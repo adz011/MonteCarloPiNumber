@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script th:src="@{/assets/js/script.js}"></script>
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Circle with Axes</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas width="500" height="500" id="myCanvas"></canvas>
+<input class="min-width-input" placeholder="Number of generated points" type="number" min="2" id="numberInput"
+       max="100000"/>
+<button onclick="calculatePi()">Generate</button>
+<label id="PiNumber"></label>
+</body>
+<script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+    const scale = 1;
+    const radius = 100;
+    const height = 500 * scale;
+    const width = 500 * scale;
+    const fontSize = 10 * scale; // Adjust font size based on scale
+    ctx.font = `${fontSize}px Arial`; // Change "Arial" to your desired font family
+
+    function drawAxes() {
+        canvas.height = height;
+        canvas.width = width;
+
+        // draw x and y axes
+        ctx.beginPath();
+        ctx.moveTo(width / 2, 0);
+        ctx.lineTo(width / 2, height);
+        ctx.moveTo(0, height / 2);
+        ctx.lineTo(width, height / 2);
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+
+        // draw pointers
+        for (let i = -2; i <= 2; i++) {
+            const x = width / 2 + i * 100;
+            ctx.beginPath();
+            ctx.moveTo(x, width / 2 - 5 * scale);
+            ctx.lineTo(x, width / 2 + 5 * scale);
+            ctx.stroke();
+            ctx.fillText(i, x + 2, width / 2 + 10 * scale);
+
+            const y = height / 2 - i * 100;
+            ctx.beginPath();
+            ctx.moveTo(height / 2 - 5 * scale, y);
+            ctx.lineTo(height / 2 + 5 * scale, y);
+            ctx.stroke();
+
+            ctx.strokeText(i, height / 2 + 10 * scale, y + 5, 10);
+        }
+
+        // draw circle
+        ctx.beginPath();
+        ctx.arc(250 * scale, 250 * scale, radius * scale, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'blue';
+        ctx.stroke();
+
+        // draw square
+        ctx.strokeStyle = 'blue';
+        ctx.strokeRect(150 * scale, 150 * scale, 200 * scale, 200 * scale);
+    }
+
+    let insideCircleCounter;
+    let outsideCircleCounter;
+
+    function checkIfLiesInsideCircle(x, y) {
+        return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) <= 100
+    }
+
+    function generatePoints(quantity) {
+        ctx.strokeStyle = `rgba(255, 78, 78, 0.53)`;
+        for (let i = 0; i < quantity; i++) {
+            let x = Math.random() * 100;
+            let y = Math.random() * 100;
+            if (checkIfLiesInsideCircle(x, y)) {
+                insideCircleCounter++;
+            } else outsideCircleCounter++;
+            ctx.strokeRect(150 * scale + x * 2 * scale, 150 * scale + y * 2 * scale, 1, 1);
+        }
+    }
+
+    function estimatePi() {
+        console.log(outsideCircleCounter);
+        console.log(insideCircleCounter);
+        let ratio = (outsideCircleCounter + insideCircleCounter) / insideCircleCounter;
+        document.getElementById('PiNumber').innerText = "Estimate of pi: " + 4 / ratio;
+    }
+
+    function reset() {
+        insideCircleCounter = 0;
+        outsideCircleCounter = 0;
+        ctx.clearRect(0, 0, 500, 500);
+    }
+
+    function calculatePi() {
+        reset();
+        drawAxes();
+        generatePoints(document.getElementById('numberInput').value);
+        estimatePi()
+    }
+
+</script>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    * {
+        background-color: #d5d5d5;
+        font-family: 'Times New Roman', serif;
+
+    }
+    .min-width-input {
+        min-width: 168px;
+    }
+</style>
+</html>
